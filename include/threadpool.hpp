@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <exception>
 #include <list>
+#include <vector>
 #include "locker.hpp"
 #include "sql_connection_pool.hpp"
 
@@ -24,7 +25,8 @@ private:
     // 请求队列中允许的最大请求数
     int max_requests_;
     // 线程池数组
-    pthread_t* threads_;
+    // pthread_t* threads_;
+    std::vector<pthread_t> threads_;
     // 请求队列
     std::list<T*> work_queue_;
     // 保护请求队列的互斥锁
