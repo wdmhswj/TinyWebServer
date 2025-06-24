@@ -20,7 +20,8 @@ private:
     int log_buf_size_; // 日志缓冲区大小
     long long count_; // 日志行数计数
     int today_; // 因为按天分类，记录今天的日期
-    std::shared_ptr<FILE> fp_; // 打开log的文件指针
+    // std::shared_ptr<FILE> fp_; // 打开log的文件指针
+    FILE* fp_; // 打开log的文件指针
     std::vector<char> buf_; // 日志缓冲区
     std::shared_ptr<block_queue<std::string>> log_queue_; // 阻塞队列
     bool is_async_; // 是否同步标志位
@@ -41,7 +42,7 @@ public:
         Log::get_instance()->async_write_log();
     }
 
-    bool init(const char* file_name, int split_lines = 5000000, int log_buf_size = 8192, int close_log, int max_queue_size = 0);
+    bool init(const char* file_name, int close_log, int split_lines = 5000000, int log_buf_size = 8192,  int max_queue_size = 0);
     void write_log(int level, const char* format, ...);
     void flush();
 

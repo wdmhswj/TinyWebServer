@@ -8,19 +8,22 @@ Log::Log() {
 }
 Log::~Log() {
     if (fp_) {
-        fclose(fp_.get()); // 关闭文件指针
+        // fclose(fp_.get()); // 关闭文件指针
+        fclose(fp_); // 关闭文件指针
+        fp_ = nullptr; // 设置为空
     }
 }
 void Log::async_write_log() {
     std::string single_log;
     while (log_queue_->pop(single_log)) { // 从阻塞队列中取出日志
         mutex_.lock(); // 加锁
-        fputs(single_log.c_str(), fp_.get()); // 写入日志到文件
+        // fputs(single_log.c_str(), fp_.get()); // 写入日志到文件
+        fputs(single_log.c_str(), fp_); // 写入日志到文件
         mutex_.unlock(); // 解锁
     }
 }
 
-bool Log::init(const char* file_name, int split_lines, int log_buf_size, int close_log, int max_queue_size) {
+bool Log::init(const char* file_name, int close_log, int split_lines, int log_buf_size, int max_queue_size) {
     // 如果设置了max_queue_size，则使用异步日志
     if (max_queue_size > 0) {
         is_async_ = true;
@@ -50,7 +53,8 @@ bool Log::init(const char* file_name, int split_lines, int log_buf_size, int clo
     char log_full_name[256] = {0}; // 日志文件全名
     snprintf(log_full_name, sizeof(log_full_name) - 1, "%s%d_%02d_%02d_%s", dir_name_.c_str(), my_tm.tm_year + 1900, my_tm.tm_mon + 1, my_tm.tm_mday, log_name_.c_str());
     today_ = my_tm.tm_mday; // 记录今天的日期
-    fp_ = std::shared_ptr<FILE>(fopen(log_full_name, "a")); // 打开日志文件
+    // fp_ = std::shared_ptr<FILE>(fopen(log_full_name, "a")); // 打开日志文件
+    fp_ = fopen(log_full_name, "a"); // 打开日志文件
     if (!fp_) {
         std::cerr << "Error opening log file: " << log_full_name << std::endl;
         return false; // 打开日志文件失败
@@ -78,8 +82,10 @@ void Log::write_log(int level, const char* format, ...) {
     ++count_; // 增加日志行数计数
     if (today_ != my_tm.tm_mday || count_ % split_lines_ == 0) {    // 如果日期变化或行数达到上限，则重新打开日志文件
         char new_log[256] = {0};
-        fflush(fp_.get()); // 刷新文件缓冲区
-        fclose(fp_.get()); // 关闭当前日志文件
+        // fflush(fp_.get()); // 刷新文件缓冲区
+        // fclose(fp_.get()); // 关闭当前日志文件
+        fflush(fp_); // 刷新文件缓冲区
+        fclose(fp_); // 关闭当前日志文件
         char tail[16] = {0}; // 日志文件尾部
         snprintf(tail, sizeof(tail)-1, "%d_%02d_%02d_", my_tm.tm_year + 1900, my_tm.tm_mon + 1, my_tm.tm_mday);
 
@@ -89,7 +95,8 @@ void Log::write_log(int level, const char* format, ...) {
         } else {
             snprintf(new_log, sizeof(new_log)-1, "%s%s%s.%lld", dir_name_.c_str(), tail, log_name_.c_str(), count_ / split_lines_); // 日志文件名加上行数
         }
-        fp_ = std::shared_ptr<FILE>(fopen(new_log, "a")); // 打开新的日志文件
+        // fp_ = std::shared_ptr<FILE>(fopen(new_log, "a")); // 打开新的日志文件
+        fp_ = fopen(new_log, "a"); // 打开新的日志文件
 
     }
 
@@ -113,7 +120,8 @@ void Log::write_log(int level, const char* format, ...) {
         log_queue_->push(log_str); // 如果是异步日志，则将日志内容放入阻塞队列
     } else {
         mutex_.lock(); // 如果不是异步日志，则直接写入文件
-        fputs(log_str.c_str(), fp_.get()); // 写入日志到文件
+        // fputs(log_str.c_str(), fp_.get()); // 写入日志到文件
+        fputs(log_str.c_str(), fp_); // 写入日志到文件
         mutex_.unlock(); // 解锁
     }
 
@@ -122,7 +130,8 @@ void Log::write_log(int level, const char* format, ...) {
 void Log::flush() {
     mutex_.lock();
     if (fp_) {
-        fflush(fp_.get()); // 刷新文件缓冲区
+        // fflush(fp_.get()); // 刷新文件缓冲区
+        fflush(fp_); // 刷新文件缓冲区
     }
     mutex_.unlock(); // 解锁
 }

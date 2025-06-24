@@ -7,3 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_executable(tiny_web_server src/main.cpp)
+
+
+
+# 测试
+add_executable(test_log test/test_log.cpp src/log.cpp)
