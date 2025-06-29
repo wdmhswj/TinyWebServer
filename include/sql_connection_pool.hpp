@@ -26,7 +26,30 @@ public:
     std::string database_name; // 使用数据库名
     int close_log_; // 日志开关
 
+public:
+	MYSQL *GetConnection();				 //获取数据库连接
+	bool ReleaseConnection(MYSQL *conn); //释放连接
+	int GetFreeConn();					 //获取连接
+	void DestroyPool();					 //销毁所有连接
+
+	//单例模式
+	static connection_pool *GetInstance();
+
+	void init(std::string url, std::string User, std::string PassWord, std::string DataBaseName, int Port, int MaxConn, int close_log); 
 
 };
+
+
+class connectionRAII{
+
+public:
+	connectionRAII(MYSQL **con, connection_pool *connPool);
+	~connectionRAII();
+	
+private:
+	MYSQL *conRAII;
+	connection_pool *poolRAII;
+};
+
 
 #endif // SQL_CONNECTION_POOL_HPP
