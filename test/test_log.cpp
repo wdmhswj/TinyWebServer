@@ -9,14 +9,14 @@ private:
 public:
     void test_basic_logging() {
         // 初始化日志，异步模式（max_queue_size > 0）
-        Log::get_instance()->init("testlog", 0, 1000, 8192, 100);
+        Log::get_instance()->init("testlog", 0, 1000, 8192, 5);
 
         // LOG_DEBUG("Debug message: %d", 1);
         // LOG_INFO("Info message: %s", "info test");
         // LOG_WARN("Warning message");
         // LOG_ERROR("Error message %.2f", 3.14);
         // LOG_FATAL("Fatal error");
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 100; ++i) {
             LOG_INFO("Sync log test %d", i);
         }
 
